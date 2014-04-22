@@ -5,7 +5,6 @@ static void DisplayMessage(Ptr<Socket> socket);
 
 static void DCNET(Ptr<Socket> socket, bool done_dcnet);
 
-
 static void SendMessage (Ptr<Socket> socket, std::string message, int index, int dest)
 {
     Ptr<Packet> sendPacket =Create<Packet> ((uint8_t*)message.c_str(),message.size());
@@ -86,10 +85,10 @@ static void ReceiveMessage (Ptr<Socket> socket)
     //recMessage = recMessage.substr (0,messageLen-1);
     MyTag recTag;
     recPacket->PeekPacketTag(recTag);
-	recTag.Print(std::cout);
+	//recTag.Print(std::cout);
     int srcNodeIndex =int(recTag.GetSourceAddress());
 	int recNodeIndex = int(recTag.GetDestAddress());
-    std::cout<<"src node index : "<< srcNodeIndex << " received node index : "<< recNodeIndex<<"\n";
+    //std::cout<<"src node index : "<< srcNodeIndex << " received node index : "<< recNodeIndex<<"\n";
     SecByteBlock key(SHA256::DIGESTSIZE);
     SHA256().CalculateDigest(key, appUtil->getSecretKeyFromGlobalMap(srcNodeIndex,recNodeIndex), 
 							appUtil->getSecretKeyFromGlobalMap(srcNodeIndex,recNodeIndex).size());
@@ -113,9 +112,17 @@ static void ReceiveMessage (Ptr<Socket> socket)
 }
 static void empty2(int i)
 {
-	int k = i+1;
-	k=k;
-	std::cout<<"*******************************\n";
+    int counter=0;
+	while(publicKeyCounter > 0) {
+     	
+        if(counter==3) break;
+        else {
+			std::cout <<"current counter is "<< counter << "\n";
+			usleep(100000);
+			++counter;
+		}
+    }
+	//ranempty=true;
 }
 
 // send prgstring
@@ -142,7 +149,7 @@ static void SimulatorLoop(Ptr<Socket> socket,TypeId tid, NodeContainer c, Ipv4In
               
 				
              	//   std::cout<<"Random bit : "<<randomBit<<" "<<index1<<" "<<index2<<"\n";
-                std::cout << "prgstring from random function is" << prgString <<"\n";
+              //  std::cout << "prgstring from random function is" << prgString <<"\n";
                 
 				//put random bit in both the maps - src and dest maps
 
@@ -194,21 +201,24 @@ static void SimulatorLoop(Ptr<Socket> socket,TypeId tid, NodeContainer c, Ipv4In
 
 static void SendPublicKey (Ptr<Socket> socket, SecByteBlock pub, int index)
 {
+	static int i=0;
+	std::cout << "counter in public key is" << i <<"\n";
     Ptr<Packet> sendPacket = Create<Packet> ((uint8_t*)pub.BytePtr(),(uint8_t) pub.SizeInBytes());
 	//std::cout<<"Debug : Inside dcnet send public key \n";
     MyTag sendTag;
     sendTag.SetSimpleValue(index);
     sendPacket->AddPacketTag(sendTag);
-
     socket->Send(sendPacket);
-    stage1SentPacketCount += 1;//increment sent packet counter for stage1
+	stage1SentPacketCount += 1;//increment sent packet counter for stage1
     std::string sendData = hexStr(pub.BytePtr(),pub.SizeInBytes());
-
     socket->Close();
+	i++;
+	++sentpublickeys;
 }
 
 static void ReceivePublicKey (Ptr<Socket> socket)
 {
+    
 	//std::cout<<"Debug : Inside dcnet receive public key \n";
     Ptr<Node> recvnode = socket->GetNode();
     int recNodeIndex = ApplicationUtil::getInstance()->getNodeFromMap(recvnode);
@@ -233,11 +243,17 @@ static void ReceivePublicKey (Ptr<Socket> socket)
 	dh.Agree(sharedKey, ApplicationUtil::getInstance()->getPrivateKeyFromMap(recNodeIndex),pubKey);
 	ApplicationUtil::getInstance()->putSecretKeyInGlobalMap(recNodeIndex,srcNodeIndex,sharedKey);
 	publicKeyCounter--;
-	//std::cout<<"Public key counter :"<< publicKeyCounter<< "\n";
+	std::cout<<"Public key counter :"<< publicKeyCounter<< "\n";
     if(publicKeyCounter == 0) {
     	//std::cout<<"Debug : calling simulator loop \n";
         Simulator::ScheduleNow (&SimulatorLoop, socket,tid,c,i);
     }
+    else {
+	   
+		//if(sentpublickeys == ((numNodes * numNodes) - numNodes ))
+			//Simulator::Schedule(Seconds(10.0),&empty2,1);
+		//std::cout << "did not recieve all public keys and currently recieved" << publicKeyCounter << "\n";
+	}
 }
 
 void generateKeys(int index, ApplicationUtil *appUtil)
@@ -415,29 +431,27 @@ ApplicationUtil *appUtil = ApplicationUtil::getInstance();
 
 static void DCNET(Ptr<Socket> socket, bool done_dcnet)
 {
-	//std::cout<<"Debug : Inside dcnet\n";
-   	ApplicationUtil *appUtil = ApplicationUtil::getInstance();
-   	if(!done_dcnet) {
-   		//Symmetric key generation
-        for(int ind =0 ; ind < (int)numNodes; ind++) {
-        	SecByteBlock priv, pub;
-            generateKeys(ind,appUtil);
-        }
+		  	ApplicationUtil *appUtil = ApplicationUtil::getInstance();
+		if(!done_dcnet) {
         //send the DH public key to everyone
-        for (int index1 = 0; index1 < (int)numNodes; index1++) {
-        	for (int index2 = 0; index2 < (int)numNodes; index2++) {
-            	if(index1 != index2) {
+        	for (int index1 = 0; index1 < (int)numNodes; index1++) {
+			    if(index1==maxnodes) break;
+				for (int index2 = 0; index2 < (int)numNodes; index2++) {
+            		if(index1 != index2) {
                 	//std::cout<<"Debug : Inside dcnet  1\n";
+					if(index2==maxnodes) break;
                     Ptr<Socket> recvNodeSink = Socket::CreateSocket (c.Get (index2), tid);
-                    InetSocketAddress localSocket = InetSocketAddress (Ipv4Address::GetAny (),9803);
+                    InetSocketAddress localSocket = InetSocketAddress (Ipv4Address::GetAny (),9803+index2+index1);
                     recvNodeSink->Bind (localSocket);
                     recvNodeSink->SetRecvCallback (MakeCallback (&ReceivePublicKey));
-					InetSocketAddress remoteSocket = InetSocketAddress (i.GetAddress (index2, 0), 9803);
-                    Ptr<Socket> sourceNodeSocket = Socket::CreateSocket (c.Get (index1), tid);
+
+                   	Ptr<Socket> sourceNodeSocket = Socket::CreateSocket (c.Get (index1), tid);
+					InetSocketAddress remoteSocket = InetSocketAddress (i.GetAddress (index2, 0), 9803+index2+index1);
                     sourceNodeSocket->Connect (remoteSocket);
-                    Simulator::Schedule (Seconds(index1/1000000.0),&SendPublicKey, sourceNodeSocket,
+					Simulator::Schedule (Seconds(index1/1000000.0),&SendPublicKey, sourceNodeSocket,
 										 appUtil->getPublicKeyFromMap(index1),index1);
-                }
+				 
+				}
             }
         }
     }
@@ -469,6 +483,7 @@ int main (int argc, char *argv[])
     // Fix non-unicast data rate to be the same as that of unicast
     Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",StringValue (phyMode));
     c.Create (numNodes);
+	Config::SetDefault ("ns3::ArpCache::PendingQueueSize", UintegerValue (1000000));
     for(int nodeind = 0; nodeind < numNodes; nodeind++)
     {
         appUtil->putNodeInMap(c.Get(nodeind),nodeind);
@@ -522,8 +537,8 @@ int main (int argc, char *argv[])
     i = ipv4.Assign (devices);
 
     tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-
-
+    //tid = TypeId::LookupByName ("ns3::TcpSocketFactory");
+   
     AnnouncementPacketCount = (numNodes * numNodes) - numNodes;
     publicKeyCounter = (numNodes * numNodes) - numNodes;
     randomBitCounter = (numNodes * (numNodes-1)/2);
@@ -534,6 +549,12 @@ int main (int argc, char *argv[])
 	source = Socket::CreateSocket (c.Get (0), tid);
     stage1StartTime.push_back(Simulator::Now());
     totalTimeStart = Simulator::Now();
+	//std::cout<<"Debug : Inside dcnet\n";
+    	//Symmetric key generation
+        for(int ind =0 ; ind < (int)numNodes; ind++) {
+        	SecByteBlock priv, pub;
+            generateKeys(ind,appUtil);
+        }
     Simulator::ScheduleNow (&DCNET, source, false);
     if (tracing == true)
     {

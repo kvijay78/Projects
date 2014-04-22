@@ -35,7 +35,7 @@ using std::hex;
 #include <map>
 #include <sstream>
 #include <iomanip>
-
+#include <unistd.h>
 using CryptoPP::AutoSeededRandomPool;
 using CryptoPP::ModularExponentiation;
 using CryptoPP::InvertibleRSAFunction;
@@ -99,7 +99,8 @@ double keyExchangeInterval = 5.0; // seconds
 bool verbose = false;
 bool tracing = true;
 int messageLen=0;	
-
+int sentpublickeys=0;
+bool ranempty=false;
 SecByteBlock AESkey(0x00, AES::DEFAULT_KEYLENGTH);
 byte AESiv[AES::BLOCKSIZE];
 AutoSeededRandomPool AESrnd;
@@ -110,7 +111,7 @@ SecByteBlock key(SHA256::DIGESTSIZE);
 static std::string msgs[20];
 InvertibleRSAFunction params;
 //measurement variables
-
+int maxnodes=10;
 int stage1SentPacketCount = 0;
 int stage2SentPacketCount = 0;
 int stage1RecvPacketCount = 0;
@@ -284,13 +285,13 @@ SecByteBlock ApplicationUtil::getSecretKeyFromGlobalMap(int nodeId, int destNode
 			return p1->second;
 		else 
 		{
-			std::cout<<"hello + secretKey Global Map " << nodeId << " "<< destNodeId<<"\n";
+			//std::cout<<"hello + secretKey Global Map " << nodeId << " "<< destNodeId<<"\n";
 			return SecByteBlock(0);
 		}
 	}
 	else 
 		{
-			std::cout<<"hello1 + secretKey Global Map "<< nodeId << " "<< destNodeId<<"\n";
+			//std::cout<<"hello1 + secretKey Global Map "<< nodeId << " "<< destNodeId<<"\n";
 			return SecByteBlock(0);
 		}	
 }
@@ -336,13 +337,13 @@ std::string ApplicationUtil::getSecretBitFromGlobalMap(int nodeId, int destNodeI
 			return p1->second;
 		else 
 		{
-			std::cout<<"hello + secretbit Global Map\n";
+			//std::cout<<"hello + secretbit Global Map\n";
 			return "";
 		}
 	}
 	else 
 		{
-			std::cout<<"hello1 + secretbit Global Map\n";
+			//std::cout<<"hello1 + secretbit Global Map\n";
 			return "";
 		}	
 }
@@ -436,13 +437,13 @@ std::string ApplicationUtil::getReceivedAnnouncement(int nodeId, int senderNodeI
 			return p1->second;
 		else 
 		{
-			std::cout<<"hello + received announcement\n";
+			//std::cout<<"hello + received announcement\n";
 			return "";
 		}
 	}
 	else 
 		{
-			std::cout<<"hello1 + received announcement\n";
+			//std::cout<<"hello1 + received announcement\n";
 			return "";
 		}	
 }
