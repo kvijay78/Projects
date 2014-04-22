@@ -1,9 +1,11 @@
 #include "ApplicationUtil.h"
+
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
 
 static void DisplayMessage(Ptr<Socket> socket);
 
 static void DCNET(Ptr<Socket> socket, bool done_dcnet);
+
 
 static void SendMessage (Ptr<Socket> socket, std::string message, int index, int dest)
 {

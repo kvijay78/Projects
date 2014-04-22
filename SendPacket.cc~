@@ -5,6 +5,7 @@ static void DisplayMessage(Ptr<Socket> socket);
 
 static void DCNET(Ptr<Socket> socket, bool done_dcnet);
 
+
 static void SendMessage (Ptr<Socket> socket, std::string message, int index, int dest)
 {
     Ptr<Packet> sendPacket =Create<Packet> ((uint8_t*)message.c_str(),message.size());
@@ -483,7 +484,7 @@ int main (int argc, char *argv[])
     // Fix non-unicast data rate to be the same as that of unicast
     Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",StringValue (phyMode));
     c.Create (numNodes);
-	Config::SetDefault ("ns3::ArpCache::PendingQueueSize", UintegerValue (1000000));
+	Config::SetDefault ("ns3::ArpCache::PendingQueueSize", UintegerValue (100));
     for(int nodeind = 0; nodeind < numNodes; nodeind++)
     {
         appUtil->putNodeInMap(c.Get(nodeind),nodeind);
