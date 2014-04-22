@@ -1,6 +1,9 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 /*
 
  * Copyright (c) 2006,2007 INRIA
@@ -76,6 +79,7 @@ public:
 
   uint8_t GetSimpleValue (void) const;
 
+<<<<<<< HEAD
   void SetSourceAddress (uint8_t value);
 
   uint8_t GetSourceAddress (void) const;
@@ -90,10 +94,16 @@ private:
   uint8_t m_simpleValue;
  uint8_t m_srcaddr;
  uint8_t m_destaddr;
+=======
+private:
+
+  uint8_t m_simpleValue;
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 
 };
 
 
+<<<<<<< HEAD
   void MyTag::SetSourceAddress (uint8_t value)
        {
         
@@ -116,6 +126,8 @@ private:
 }
 
 
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 TypeId 
 
 MyTag::GetTypeId (void)
@@ -140,6 +152,7 @@ MyTag::GetTypeId (void)
 
     ;
 
+<<<<<<< HEAD
 /*
 tid.AddAttribute ("Src Index",
 
@@ -166,6 +179,8 @@ tid.AddAttribute ("Dest Index",
     ;
 */
 
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
   return tid;
 
 }
@@ -185,7 +200,11 @@ MyTag::GetSerializedSize (void) const
 
 {
 
+<<<<<<< HEAD
   return 3;
+=======
+  return 1;
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 
 }
 
@@ -196,8 +215,11 @@ MyTag::Serialize (TagBuffer i) const
 {
 
   i.WriteU8 (m_simpleValue);
+<<<<<<< HEAD
 i.WriteU8 (m_srcaddr);
 i.WriteU8 (m_destaddr);
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 
 }
 
@@ -208,8 +230,11 @@ MyTag::Deserialize (TagBuffer i)
 {
 
   m_simpleValue = i.ReadU8 ();
+<<<<<<< HEAD
 m_srcaddr = i.ReadU8 ();
 m_destaddr = i.ReadU8 ();
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 
 }
 
@@ -220,8 +245,11 @@ MyTag::Print (std::ostream &os) const
 {
 
   os << "v=" << (uint32_t)m_simpleValue;
+<<<<<<< HEAD
  os << "s=" << (uint32_t)m_srcaddr;
  os << "d=" << (uint32_t)m_destaddr;
+=======
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 
 }
 
@@ -241,5 +269,9 @@ MyTag::GetSimpleValue (void) const
 {
 
   return m_simpleValue;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2d380d4462567a9faa321e5be3a9eb9be9b2e710
 }
 
