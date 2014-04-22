@@ -1,5 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
+
 /*
 
  * Copyright (c) 2006,2007 INRIA
@@ -75,11 +76,44 @@ public:
 
   uint8_t GetSimpleValue (void) const;
 
+  void SetSourceAddress (uint8_t value);
+
+  uint8_t GetSourceAddress (void) const;
+
+ void SetDestAddress (uint8_t value);
+
+  uint8_t GetDestAddress (void) const;
+
+
 private:
 
   uint8_t m_simpleValue;
+ uint8_t m_srcaddr;
+ uint8_t m_destaddr;
 
 };
+
+
+  void MyTag::SetSourceAddress (uint8_t value)
+       {
+        
+        m_srcaddr = value;
+}
+
+  uint8_t MyTag::GetSourceAddress (void) const
+{
+        return m_srcaddr;
+}
+
+ void MyTag::SetDestAddress (uint8_t value)
+{
+             m_destaddr = value;
+}
+
+ uint8_t MyTag::GetDestAddress (void) const
+{
+         return m_destaddr;
+}
 
 
 TypeId 
@@ -106,6 +140,32 @@ MyTag::GetTypeId (void)
 
     ;
 
+/*
+tid.AddAttribute ("Src Index",
+
+                   "A simple index",
+
+                   EmptyAttributeValue (),
+
+                   MakeUintegerAccessor (&MyTag::GetSourceAddress),
+
+                   MakeUintegerChecker<uint8_t> ())
+
+    ;
+
+tid.AddAttribute ("Dest Index",
+
+                   "A simple index",
+
+                   EmptyAttributeValue (),
+
+                   MakeUintegerAccessor (&MyTag::GetDestAddress),
+
+                   MakeUintegerChecker<uint8_t> ())
+
+    ;
+*/
+
   return tid;
 
 }
@@ -125,7 +185,7 @@ MyTag::GetSerializedSize (void) const
 
 {
 
-  return 1;
+  return 3;
 
 }
 
@@ -136,6 +196,8 @@ MyTag::Serialize (TagBuffer i) const
 {
 
   i.WriteU8 (m_simpleValue);
+i.WriteU8 (m_srcaddr);
+i.WriteU8 (m_destaddr);
 
 }
 
@@ -146,6 +208,8 @@ MyTag::Deserialize (TagBuffer i)
 {
 
   m_simpleValue = i.ReadU8 ();
+m_srcaddr = i.ReadU8 ();
+m_destaddr = i.ReadU8 ();
 
 }
 
@@ -156,6 +220,8 @@ MyTag::Print (std::ostream &os) const
 {
 
   os << "v=" << (uint32_t)m_simpleValue;
+ os << "s=" << (uint32_t)m_srcaddr;
+ os << "d=" << (uint32_t)m_destaddr;
 
 }
 
@@ -175,6 +241,5 @@ MyTag::GetSimpleValue (void) const
 {
 
   return m_simpleValue;
-
 }
 
